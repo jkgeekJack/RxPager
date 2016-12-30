@@ -20,4 +20,10 @@ public class MainActivity extends AppCompatActivity {
         mRxPager= (MyRxPager) findViewById(R.id.vp);
         mRxPager.init(this,mImgids);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRxPager.stopInterval();
+    }
 }

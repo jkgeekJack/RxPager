@@ -12,9 +12,10 @@ import android.widget.LinearLayout;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by Administrator on 2016/10/10.
@@ -59,6 +60,8 @@ public class MyRxPager extends ViewPager {
         }
     };
 
+    private Disposable mDisposable;
+
     public MyRxPager(Context context) {
         super(context);
     }
@@ -78,12 +81,12 @@ public class MyRxPager extends ViewPager {
         mCurrentPage = 1;
         setAdapter(new MyAdapter());
         setCurrentItem(mCurrentPage);
-        Observable.interval(5, 5, TimeUnit.SECONDS)  // 5s的延迟，5s的循环时间
+        mDisposable = Observable.interval(5, 5, TimeUnit.SECONDS)  // 5s的延迟，5s的循环时间
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
+                .subscribe(new Consumer<Long>() {
                     @Override
-                    public void call(Long aLong) {
+                    public void accept(Long aLong) throws Exception {
                         // 进行轮播操作
                         // 如果正在触摸就不执行自动轮播
                         if (!mIsTouch) {
@@ -121,6 +124,15 @@ public class MyRxPager extends ViewPager {
             view.setScaleType(ImageView.ScaleType.FIT_XY);
             container.addView(view);
             return view;
+        }
+    }
+
+    /**
+     * 取消自动轮播
+     */
+    public void stopInterval() {
+        if (mDisposable != null && !mDisposable.isDisposed()) {
+            mDisposable.dispose();
         }
     }
 }
